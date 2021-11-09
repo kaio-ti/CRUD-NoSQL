@@ -1,0 +1,9 @@
+class InvalidCreationDataError(Exception):
+    ...
+
+class InvalidUpdateDataError(Exception):
+    ...
+
+class InvalidIDError(Exception):
+    ...
+
