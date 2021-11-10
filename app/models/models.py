@@ -2,7 +2,7 @@ from datetime import datetime
 from pymongo import MongoClient
 from flask import jsonify
 
-from exceptions.exceptions import InvalidCreationDataError, InvalidIDError, InvalidUpdateDataError
+from exceptions.exceptions import InvalidCreationDataError, InvalidIDError, InvalidUpdateDataError, KeyMissingError
 
 client = MongoClient('mongodb://localhost:27017/')
 db = client['kenzie']
@@ -39,10 +39,15 @@ class Post():
         return {"message": "Id não encontrado"}, 404
 
     def data_validation(**kwargs):
+
+        validation = ['title', 'author', 'tags', 'content']
+
         for key in kwargs:
-            validation = ['title', 'author', 'tags', 'content']
             if not key in validation:
-                raise InvalidCreationDataError
+                raise KeyMissingError(f'{key} inválido')
+        for item in validation:
+            if item not in (kwargs):
+                raise   KeyMissingError(f'faltando a chave {key}')
 
         if type(kwargs['title']) != str or type(kwargs['author']) != str or type(kwargs['tags']) != list:
             raise InvalidCreationDataError
@@ -56,7 +61,7 @@ class Post():
         del post['_id']
         return post
 
-
+    @staticmethod
     def delete_post_id(id):
         post_list = list(db.collection.find({"id": id}))
         if len(post_list) == 0:
@@ -68,6 +73,7 @@ class Post():
 
         return post_list
 
+    @staticmethod
     def update_post_id(id, **kwargs):
         post_list = list(db.collection.find({"id": id}))
         validate = ['title', 'author', 'tags', 'content']
@@ -78,6 +84,9 @@ class Post():
         for key in kwargs:
             if not key in validate:
                 raise InvalidUpdateDataError
+
+        if type(kwargs['title']) != str or type(kwargs['author']) != str or type(kwargs['tags']) != list:
+            raise InvalidUpdateDataError
         
         update = str(datetime.now().strftime('%d/%m/%y, %H:%M'))
 

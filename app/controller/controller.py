@@ -1,7 +1,7 @@
 from flask import Flask, request
 from flask.json import jsonify
 from app.models.models import Post
-from exceptions.exceptions import InvalidCreationDataError, InvalidIDError, InvalidUpdateDataError
+from exceptions.exceptions import InvalidCreationDataError, InvalidIDError, InvalidUpdateDataError, KeyMissingError
 
 def init_app(app: Flask):
 
@@ -21,6 +21,8 @@ def init_app(app: Flask):
             post = Post(**data)
             save_post = post.create_post()
             return save_post, 201
+        except KeyMissingError as e:
+            return {"message": str(e)}, 400
         except InvalidCreationDataError:
             return {"message": "Informações erradas"}, 400
 
